@@ -146,6 +146,7 @@ under the License.
             <screen name="ajaxNotLoggedIn"/>
             <screen name="requirePasswordChange"/>
             <screen name="forgotPassword"/>
+            <screen name="GetUiLabels"/>
             <screen name="help"/>
             <screen name="viewBlocked"/>
             <screen name="TimeDuration" location="component://common-theme/widget/LookupScreens.xml"/>
@@ -166,6 +167,7 @@ under the License.
             <form name="CommonSimpleList"/>
             <form name="CommonBasicList"/>
             <form name="CommonDynamicList"/>
+            <form name="CommonDynamicMulti"/>
             <form name="CommonInLineEditList"/>
             <form name="CommonBasicSingle"/>
             <form name="CommonDynamicSingle"/>

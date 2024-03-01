@@ -25,6 +25,19 @@ under the License.
 
     <!-- generate a PDF for the invoice. Sharing the same script file as the HTML page for viewing invoice -->
     <screen name="InvoicePDF">
+         <section>
+             <actions>
+                <set field="defaultTemplateLocation" value="component://accounting/widget/AccountingPrintScreens.xml"/>
+                <set field="defaultTemplateName" value="DefaultInvoicePDF"/>
+                <script location="component://commonext/src/main/groovy/org/apache/ofbiz/commonext/template/DocTypeTemplate.groovy"/>
+            </actions>
+            <widgets>
+                <include-screen name="${templateName}" location="${templateLocation}"/>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="DefaultInvoicePDF">
         <section>
             <actions>
                 <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
@@ -33,8 +46,8 @@ under the License.
                 <property-map resource="OrderUiLabels" map-name="uiLabelMap" global="true"/>
                 <property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true"/>
                 <set field="titleProperty" value="AccountingInvoice"/>
-                <script location="component://accounting/groovyScripts/invoice/EditInvoice.groovy"/>
-                <script location="component://party/groovyScripts/party/GetMyCompany.groovy"/>
+                <script location="component://accounting/src/main/groovy/org/apache/ofbiz/accounting/invoice/EditInvoice.groovy"/>
+                <script location="component://party/src/main/groovy/org/apache/ofbiz/party/party/GetMyCompany.groovy"/>
             </actions>
             <widgets>
                 <section>
@@ -109,7 +122,7 @@ under the License.
                 <property-map resource="PartyUiLabels" map-name="uiLabelMap" global="true"/>
                 <property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true"/>
                 <set field="invoiceIds" from-field="parameters.invoiceIds" type="List"/>
-                <script location="component://accounting/groovyScripts/invoice/PrintInvoices.groovy"/>
+                <script location="component://accounting/src/main/groovy/org/apache/ofbiz/accounting/invoice/PrintInvoices.groovy"/>
             </actions>
             <widgets>
                <platform-specific>

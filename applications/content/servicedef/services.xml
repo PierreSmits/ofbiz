@@ -32,16 +32,16 @@
     </service>
 
     <!-- Content services? -->
-    <service name="getPublicForumMessage" engine="simple" default-entity-name="Content" auth="true"
-            location="component://content/minilang/content/ContentServices.xml" invoke="getPublicForumMessage">
+    <service name="getPublicForumMessage" engine="group" default-entity-name="Content" auth="true">
         <description>Get Content and resource information</description>
-        <permission-service service-name="genericContentPermission" main-action="VIEW"/>
-        <auto-attributes include="pk" mode="IN" optional="false"/>
-        <attribute mode="OUT" name="resultData" optional="true" type="java.util.Map"/>
+        <deprecated use-instead="getContentAndDataResource" since="Release 22.01"/>
+        <group>
+            <invoke name="getContentAndDataResource"/>
+        </group>
     </service>
 
     <service name="getContentAndDataResource" engine="groovy" default-entity-name="Content" auth="true"
-            location="component://content/groovyScripts/content/ContentServices.groovy" invoke="getContentAndDataResource">
+            location="component://content/src/main/groovy/org/apache/ofbiz/content/content/ContentServicesScript.groovy" invoke="getContentAndDataResource">
         <description>Get Content and resource information</description>
         <permission-service service-name="genericContentPermission" main-action="VIEW"/>
         <auto-attributes include="pk" mode="IN" optional="false"/>
@@ -49,7 +49,7 @@
     </service>
 
     <service name="getDataResource" engine="groovy" default-entity-name="DataResource" auth="true"
-            location="component://content/groovyScripts/content/ContentServices.groovy" invoke="getDataResource">
+            location="component://content/src/main/groovy/org/apache/ofbiz/content/content/ContentServicesScript.groovy" invoke="getDataResource">
         <description>Get Content and resource information</description>
         <permission-service service-name="genericContentPermission" main-action="VIEW"/>
         <auto-attributes include="pk" mode="IN" optional="false"/>
@@ -117,7 +117,7 @@
     </service>
 
     <!-- Generic Content Services -->
-    <service name="createEmailContent" engine="groovy" location="component://content/groovyScripts/content/ContentServices.groovy" invoke="createEmailContent">
+    <service name="createEmailContent" engine="groovy" location="component://content/src/main/groovy/org/apache/ofbiz/content/content/ContentServicesScript.groovy" invoke="createEmailContent">
         <permission-service service-name="contentManagerPermission" main-action="CREATE"/>
         <auto-attributes mode="IN" entity-name="Content" optional="true"/>
         <attribute name="subject" type="String" mode="IN" optional="false">
@@ -133,7 +133,7 @@
         <attribute name="htmlBody" type="String" mode="IN" optional="true" allow-html="any"/>
         <override name="contentId" mode="INOUT"/>
     </service>
-    <service name="updateEmailContent" engine="groovy" location="component://content/groovyScripts/content/ContentServices.groovy" invoke="updateEmailContent">
+    <service name="updateEmailContent" engine="groovy" location="component://content/src/main/groovy/org/apache/ofbiz/content/content/ContentServicesScript.groovy" invoke="updateEmailContent">
         <permission-service service-name="contentManagerPermission" main-action="UPDATE"/>
         <attribute name="subjectDataResourceId" type="String" mode="IN" optional="true"/>
         <attribute name="subject" type="String" mode="IN" optional="true"/>
@@ -143,7 +143,7 @@
         <attribute name="htmlBody" type="String" mode="IN" optional="true" allow-html="any"/>
     </service>
 
-    <service name="createDownloadContent" engine="groovy" location="component://content/groovyScripts/content/ContentServices.groovy" invoke="createDownloadContent">
+    <service name="createDownloadContent" engine="groovy" location="component://content/src/main/groovy/org/apache/ofbiz/content/content/ContentServicesScript.groovy" invoke="createDownloadContent">
         <permission-service service-name="contentManagerPermission" main-action="CREATE"/>
         <auto-attributes mode="IN" entity-name="Content" optional="true"/>
         <attribute name="file" type="String" mode="IN" optional="false">
@@ -153,13 +153,13 @@
         </attribute>
         <override name="contentId" mode="INOUT"/>
     </service>
-    <service name="updateDownloadContent" engine="groovy" location="component://content/groovyScripts/content/ContentServices.groovy" invoke="updateDownloadContent">
+    <service name="updateDownloadContent" engine="groovy" location="component://content/src/main/groovy/org/apache/ofbiz/content/content/ContentServicesScript.groovy" invoke="updateDownloadContent">
         <permission-service service-name="contentManagerPermission" main-action="UPDATE"/>
         <attribute name="fileDataResourceId" type="String" mode="IN" optional="true"/>
         <attribute name="file" type="String" mode="IN" optional="true"/>
     </service>
 
-    <service name="createSimpleTextContent" engine="groovy" location="component://content/groovyScripts/content/ContentServices.groovy" invoke="createSimpleTextContent">
+    <service name="createSimpleTextContent" engine="groovy" location="component://content/src/main/groovy/org/apache/ofbiz/content/content/ContentServicesScript.groovy" invoke="createSimpleTextContent">
         <permission-service service-name="contentManagerPermission" main-action="CREATE"/>
         <auto-attributes mode="IN" entity-name="Content" optional="true"/>
         <attribute name="text" type="String" mode="IN" optional="false" allow-html="safe">
@@ -169,14 +169,14 @@
         </attribute>
         <override name="contentId" mode="INOUT"/>
     </service>
-    <service name="updateSimpleTextContent" engine="groovy" location="component://content/groovyScripts/content/ContentServices.groovy" invoke="updateSimpleTextContent">
+    <service name="updateSimpleTextContent" engine="groovy" location="component://content/src/main/groovy/org/apache/ofbiz/content/content/ContentServicesScript.groovy" invoke="updateSimpleTextContent">
         <permission-service service-name="contentManagerPermission" main-action="UPDATE"/>
         <attribute name="textDataResourceId" type="String" mode="IN" optional="true"/>
         <attribute name="text" type="String" mode="IN" optional="true" allow-html="safe"/>
     </service>
 
     <!-- Util -->
-    <service name="findAssocContent" engine="groovy" location="component://content/groovyScripts/content/ContentServices.groovy" invoke="findAssocContent" auth="true">
+    <service name="findAssocContent" engine="groovy" location="component://content/src/main/groovy/org/apache/ofbiz/content/content/ContentServicesScript.groovy" invoke="findAssocContent" auth="true">
         <attribute name="contentId" mode="IN" type="String" optional="false"/>
         <attribute name="mapKeys" mode="IN" type="List" optional="false"/>
         <attribute name="contentAssocs" mode="OUT" type="List" optional="true"/>
@@ -412,7 +412,7 @@
     </service>
 
     <service name="createArticleContent" engine="groovy" transaction-timeout="300" auth="true"
-            location="component://content/groovyScripts/content/ContentServices.groovy" invoke="createArticleContent">
+            location="component://content/src/main/groovy/org/apache/ofbiz/content/content/ContentServicesScript.groovy" invoke="createArticleContent">
         <description>Creates content records for a blog entry</description>
         <required-permissions join-type="AND">
             <check-permission permission="CONTENTMGR" action="_CREATE"/>
@@ -559,20 +559,27 @@
         <attribute name="fieldValue0" type="String" mode="IN" optional="true"/>
     </service>
 
-    <service name="resequence" auth="true" engine="java" validate="true" transaction-timeout="7200"
-        location="org.apache.ofbiz.content.ContentManagementServices" invoke="resequence">
+    <service name="resequence" auth="true" engine="group">
+        <deprecated use-instead="resequenceContentAssocChildren" since="release22.01"/>
+        <group>
+            <invoke name="resequenceContentAssocChildren"/>
+        </group>
+    </service>
+    <service name="resequenceContentAssocChildren" auth="true" engine="java" transaction-timeout="7200"
+             location="org.apache.ofbiz.content.ContentManagementServices" invoke="resequence">
         <description>Reorder sequence numbers in ContentAssoc entities for a given parent id</description>
-        <attribute mode="IN" name="contentIdTo" optional="false" type="String">
+        <attribute mode="IN" name="contentId" optional="false" type="String">
             <type-validate>
-                <fail-property resource="ContentErrorUiLabels" property="ContentRequiredFieldMissingContentIdTo"/>
+                <fail-property resource="ContentErrorUiLabels" property="ContentRequiredFieldMissingContentId"/>
             </type-validate>
         </attribute>
-        <attribute mode="IN" name="seqInc" optional="true" type="Integer"/>
+        <attribute mode="IN" name="seqInc" optional="true" type="Integer" default-value="10"/>
         <attribute mode="IN" name="typeList" optional="true" type="List"/>
-        <attribute mode="IN" name="contentId" optional="true" type="String"/>
+        <attribute mode="IN" name="contentIdTo" optional="true" type="String"/>
         <attribute mode="IN" name="contentAssocTypeId" optional="true" type="String"/>
         <attribute mode="IN" name="dir" optional="true" type="String"/>
     </service>
+
     <service name="changeLeafToNode" validate="true" auth="true" engine="java" transaction-timeout="7200"
         location="org.apache.ofbiz.content.ContentManagementServices" invoke="changeLeafToNode">
         <description>Moves dataResource to separate content associated with current content so that node can have only children, no content of its own</description>
@@ -818,8 +825,8 @@
     </service>
 
     <!-- blog services -->
-    <service name="createBlogEntry" engine="simple" auth="true"
-        location="component://content/minilang/blog/BlogServices.xml" invoke="createBlogEntry">
+    <service name="createBlogEntry" engine="groovy" auth="true"
+        location="component://content/src/main/groovy/org/apache/ofbiz/content/BlogServices.groovy" invoke="createBlogEntry">
         <description>Creates content records for a blog entry</description>
         <required-permissions join-type="AND">
             <check-permission permission="CONTENTMGR" action="_CREATE"/>
@@ -838,8 +845,8 @@
         <attribute name="articleData" type="String" mode="IN" optional="true" allow-html="safe"/>
         <attribute name="summaryData" type="String" mode="IN" optional="true" allow-html="safe"/>
     </service>
-    <service name="updateBlogEntry" engine="simple" auth="true"
-        location="component://content/minilang/blog/BlogServices.xml" invoke="updateBlogEntry">
+    <service name="updateBlogEntry" engine="groovy" auth="true"
+        location="component://content/src/main/groovy/org/apache/ofbiz/content/BlogServices.groovy" invoke="updateBlogEntry">
         <description>Updates content records for a blog entry</description>
         <required-permissions join-type="AND">
             <check-permission permission="CONTENTMGR" action="_UPDATE"/>
@@ -862,8 +869,8 @@
         <attribute name="articleData" type="String" mode="IN" optional="true" allow-html="safe"/>
         <attribute name="summaryData" type="String" mode="IN" optional="true" allow-html="safe"/>
     </service>
-    <service name="getBlogEntry" engine="simple" auth="true"
-        location="component://content/minilang/blog/BlogServices.xml" invoke="getBlogEntry">
+    <service name="getBlogEntry" engine="groovy" auth="true"
+        location="component://content/src/main/groovy/org/apache/ofbiz/content/BlogServices.groovy" invoke="getBlogEntry">
         <description>Retrieves content records for a blog entry</description>
         <attribute name="blogContentId" type="String" mode="INOUT" optional="false">
             <type-validate>
@@ -875,25 +882,24 @@
         <attribute name="statusId" type="String" mode="OUT" optional="true"/>
         <attribute name="description" type="String" mode="OUT" optional="true"/>
         <attribute name="templateDataResourceId" type="String" mode="OUT" optional="true"/>
-        <attribute name="summaryData" type="String" mode="OUT" optional="true"/>
-        <attribute name="articleData" type="String" mode="OUT" optional="true"/>
         <attribute name="imageContentId" type="String" mode="OUT" optional="true"/>
+        <attribute name="imageDataResourceId" type="String" mode="IN" optional="true"/>
+        <attribute name="articleData" type="String" mode="OUT" optional="true"/>
         <attribute name="articleContentId" type="String" mode="OUT" optional="true"/>
+        <attribute name="articleDataResourceId" type="String" mode="OUT" optional="true"/>
+        <attribute name="summaryData" type="String" mode="OUT" optional="true"/>
         <attribute name="summaryContentId" type="String" mode="OUT" optional="true"/>
+        <attribute name="summaryDataResourceId" type="String" mode="OUT" optional="true"/>
     </service>
-    <service name="getOwnedOrPublishedBlogEntries" engine="simple" location="component://content/minilang/blog/BlogServices.xml" invoke="getOwnedOrPublishedBlogEntries"
-         auth="true"  transaction-timeout="7200">
-        <attribute type="String" mode="IN" name="contentId" optional="false">
+    <service name="getOwnedOrPublishedBlogEntries" engine="groovy" auth="true" transaction-timeout="7200"
+        location="component://content/src/main/groovy/org/apache/ofbiz/content/BlogServices.groovy" invoke="getOwnedOrPublishedBlogEntries">
+        <attribute name="contentId" type="String" mode="IN" >
             <type-validate>
                 <fail-property resource="ContentErrorUiLabels" property="ContentRequiredFieldMissingContentId"/>
             </type-validate>
         </attribute>
-        <attribute mode="IN" name="userLogin" optional="false" type="org.apache.ofbiz.entity.GenericValue">
-            <type-validate>
-                <fail-property resource="ContentErrorUiLabels" property="ContentRequiredFieldMissingUserLogin"/>
-            </type-validate>
-        </attribute>
-        <attribute mode="OUT" name="blogList" optional="true" type="List"/>
+        <attribute name="blogContentId" type="String" mode="OUT" optional="true"/>
+        <attribute name="blogList" type="List" mode="OUT" optional="true"/>
     </service>
 
     <!-- blog RSS services -->
@@ -910,15 +916,15 @@
 
     <!-- content permission services -->
     <service name="contentManagerRolePermission" engine="groovy" auth="true"
-            location="component://content/groovyScripts/permission/ContentPermissionServices.groovy" invoke="contentManagerRolePermission">
+            location="component://content/src/main/groovy/org/apache/ofbiz/content/permission/ContentPermissionServices.groovy" invoke="contentManagerRolePermission">
         <implements service="permissionInterface"/>
     </service>
     <service name="contentManagerPermission" engine="groovy" auth="true"
-            location="component://content/groovyScripts/permission/ContentPermissionServices.groovy" invoke="contentManagerPermission">
+            location="component://content/src/main/groovy/org/apache/ofbiz/content/permission/ContentPermissionServices.groovy" invoke="contentManagerPermission">
         <implements service="permissionInterface"/>
     </service>
     <service name="genericContentPermission" engine="groovy" auth="true"
-            location="component://content/groovyScripts/permission/ContentPermissionServices.groovy" invoke="genericContentPermission">
+            location="component://content/src/main/groovy/org/apache/ofbiz/content/permission/ContentPermissionServices.groovy" invoke="genericContentPermission">
         <description>Generic Content Permission Service; Takes mainAction to determine the mode.</description>
         <implements service="permissionInterface"/>
         <attribute name="ownerContentId" type="String" mode="IN" optional="true"/>
@@ -930,7 +936,7 @@
         <attribute name="contentOperationId" type="String" mode="IN" optional="true"/>
     </service>
     <service name="checkOwnership" engine="groovy" auth="true"
-            location="component://content/groovyScripts/permission/ContentPermissionServices.groovy" invoke="checkOwnership">
+            location="component://content/src/main/groovy/org/apache/ofbiz/content/permission/ContentPermissionServices.groovy" invoke="checkOwnership">
         <description>Generic DataResource Permission Service; Takes mainAction to determine the mode.</description>
         <implements service="permissionInterface"/>
         <attribute name="roleEntity" type="String" mode="IN" optional="true"/>
@@ -946,7 +952,7 @@
     </service>
 
     <service name="createContentAlternativeUrl" engine="groovy"
-            location="component://content/groovyScripts/content/ContentServices.groovy" invoke="createContentAlternativeUrl" auth="true" transaction-timeout="7200">
+            location="component://content/src/main/groovy/org/apache/ofbiz/content/content/ContentServicesScript.groovy" invoke="createContentAlternativeUrl" auth="true" transaction-timeout="7200">
         <description>Create Content Alternative URL</description>
         <attribute name="contentId" mode="IN" type="String" optional="true"></attribute>
         <attribute name="contentCreated" mode="OUT" type="String" optional="true"></attribute>

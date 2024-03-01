@@ -65,7 +65,7 @@ public final class UtilDateTime {
 
     private UtilDateTime() { }
 
-    public static double getInterval(Date from, Date thru) {
+    private static double getInterval(Date from, Date thru) {
         return thru != null ? thru.getTime() - from.getTime() : 0;
     }
 
@@ -486,7 +486,7 @@ public final class UtilDateTime {
      * @param time The time String: either HH:MM or HH:MM:SS
      * @return A Date made from the date and time Strings
      */
-    public static java.util.Date toDate(String date, String time) {
+    private static java.util.Date toDate(String date, String time) {
         if (date == null || time == null) {
             return null;
         }
@@ -535,8 +535,8 @@ public final class UtilDateTime {
      * @param secondStr The second String
      * @return A Date made from separate Strings for month, day, year, hour, minute, and second.
      */
-    public static java.util.Date toDate(String monthStr, String dayStr, String yearStr, String hourStr,
-            String minuteStr, String secondStr) {
+    static java.util.Date toDate(String monthStr, String dayStr, String yearStr, String hourStr,
+                                 String minuteStr, String secondStr) {
 
         int month;
         int day;
@@ -569,7 +569,7 @@ public final class UtilDateTime {
      * @param second The second int
      * @return A Date made from separate ints for month, day, year, hour, minute, and second.
      */
-    public static java.util.Date toDate(int month, int day, int year, int hour, int minute, int second) {
+    private static java.util.Date toDate(int month, int day, int year, int hour, int minute, int second) {
         Calendar calendar = Calendar.getInstance();
 
         try {
@@ -586,7 +586,7 @@ public final class UtilDateTime {
      * @param date The Date
      * @return A date String in the given format
      */
-    public static String toDateString(java.util.Date date, String format) {
+    private static String toDateString(java.util.Date date, String format) {
         if (date == null) {
             return "";
         }
@@ -1115,7 +1115,7 @@ public final class UtilDateTime {
         return cal.get(Calendar.YEAR);
     }
 
-    public static Date getEarliestDate() {
+    static Date getEarliestDate() {
         Calendar cal = getCalendarInstance(TimeZone.getTimeZone("GMT"), Locale.getDefault());
         cal.set(Calendar.YEAR, cal.getActualMinimum(Calendar.YEAR));
         cal.set(Calendar.MONTH, cal.getActualMinimum(Calendar.MONTH));
@@ -1127,7 +1127,7 @@ public final class UtilDateTime {
         return cal.getTime();
     }
 
-    public static Date getLatestDate() {
+    static Date getLatestDate() {
         Calendar cal = getCalendarInstance(TimeZone.getTimeZone("GMT"), Locale.getDefault());
         cal.set(Calendar.YEAR, cal.getActualMaximum(Calendar.YEAR));
         cal.set(Calendar.MONTH, cal.getActualMaximum(Calendar.MONTH));
@@ -1146,7 +1146,7 @@ public final class UtilDateTime {
      * @param date  the date to copy
      * @return an immutable copy of {@code date}.
      */
-    public static Date unmodifiableDate(Date date) {
+    static Date unmodifiableDate(Date date) {
         if (date instanceof ImmutableDate) {
             return date;
         }

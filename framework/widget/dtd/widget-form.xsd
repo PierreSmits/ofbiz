@@ -586,6 +586,7 @@ under the License.
             <xs:sequence>
                 <xs:element minOccurs="0" ref="auto-parameters-service"/>
                 <xs:element minOccurs="0" ref="auto-parameters-entity"/>
+                <xs:element minOccurs="0" ref="auto-parameters-form"/>
                 <xs:element minOccurs="0" maxOccurs="unbounded" ref="parameter" />
             </xs:sequence>
             <xs:attribute name="event-type" use="required">
@@ -856,7 +857,15 @@ under the License.
                     </xs:documentation>
                 </xs:annotation>
             </xs:attribute>
-            <xs:attribute name="disabled" type="xs:boolean" default="false"/>
+            <xs:attribute type="xs:string" name="disabled">
+                <xs:annotation>
+                    <xs:documentation>
+                        Set a field as disabled : not mutable, not focusable, not submitted if in a form.
+                        Accepts ${} notation to allow use of expressions.
+                        Expressions must evaluate to the strings 'true', 'false' (without quotes) or empty (equivalent to false)
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
         </xs:complexType>
     </xs:element>
 
@@ -868,7 +877,14 @@ under the License.
                 <xs:element ref="list-options" />
                 <xs:element ref="option" />
             </xs:choice>
-            <xs:attribute name="all-checked" type="xs:boolean"/>
+            <xs:attribute name="all-checked" type="xs:boolean">
+                <xs:annotation>
+                    <xs:documentation>
+                        None option is checked by default.
+                        You may check options by setting field names as in QuoteForms.xml#FindQuotes
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
         </xs:complexType>
     </xs:element>
     <xs:element name="container" substitutionGroup="AllFields">
@@ -1439,6 +1455,14 @@ under the License.
                     <xs:documentation>The message displayed in confirmation box</xs:documentation>
                 </xs:annotation>
             </xs:attribute>
+            <xs:attribute name="propagate-callback" type="xs:boolean" default="false">
+                <xs:annotation>
+                    <xs:documentation>If you are on an edition process with different steps and you want to wait the end of the complete action before using the callback,
+                        use propagate-callback="true". The submit will understand that you want to continue your process and will not close the modal to refresh the screen.
+                        The callback action will be kept within the different steps
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
         </xs:complexType>
     </xs:element>
     <xs:element name="text" substitutionGroup="AllFields">
@@ -1495,6 +1519,13 @@ under the License.
                         table clean html spellcheck |(separator) Default is that all buttons are shown</xs:documentation>
                 </xs:annotation>
             </xs:attribute>
+            <xs:attribute type="xs:string" name="placeholder">
+                <xs:annotation>
+                    <xs:documentation>
+                        Content of the HTML placeholder attribute (https://developer.mozilla.org/fr/docs/Web/HTML/Element/textarea#placeholder), text to be displayed to the user when textarea is empty. Similar to text input placeholder.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
         </xs:complexType>
     </xs:element>
     <xs:element name="text-find" substitutionGroup="AllFields">
@@ -1546,6 +1577,12 @@ under the License.
             <xs:documentation>Area to be updated when a field event occurs.</xs:documentation>
         </xs:annotation>
         <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" ref="auto-parameters-service"/>
+                <xs:element minOccurs="0" ref="auto-parameters-entity"/>
+                <xs:element minOccurs="0" ref="auto-parameters-form"/>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="parameter" />
+            </xs:sequence>
             <xs:attribute name="event-type" use="required">
                 <xs:simpleType>
                     <xs:restriction base="xs:token">
@@ -1554,8 +1591,8 @@ under the License.
                     </xs:restriction>
                 </xs:simpleType>
             </xs:attribute>
-            <xs:attribute type="xs:string" name="area-id" use="required" />
-            <xs:attribute type="xs:string" name="area-target" use="required" />
+            <xs:attribute type="xs:string" name="area-id" />
+            <xs:attribute type="xs:string" name="area-target" />
         </xs:complexType>
     </xs:element>
 

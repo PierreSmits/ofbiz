@@ -70,6 +70,7 @@ under the License.
             <widgets>
                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="pre-body">
+                        <include-menu name="MainActionMenu" location="component://workeffort/widget/WorkEffortMenus.xml"/>
                         <section>
                             <condition>
                                 <and>
@@ -129,6 +130,9 @@ under the License.
             </actions>
             <widgets>
                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="pre-body">
+                        <include-menu name="MainActionMenu" location="component://workeffort/widget/WorkEffortMenus.xml"/>
+                    </decorator-section>
                     <decorator-section name="body">
                         <section>
                             <condition>
@@ -164,13 +168,16 @@ under the License.
             </actions>
             <widgets>
                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="pre-body">
+                        <include-menu name="MainActionMenu" location="component://workeffort/widget/WorkEffortMenus.xml"/>
+                    </decorator-section>
                     <decorator-section name="body">
                         <section>
                             <condition>
                                 <if-has-permission permission="WORKEFFORTMGR" action="_VIEW" />
                             </condition>
                             <actions>
-                                <script location="component://workeffort/groovyScripts/workeffort/calendar/Days.groovy" />
+                                <script location="component://workeffort/src/main/groovy/org/apache/ofbiz/workeffort/workeffort/calendar/Days.groovy" />
                             </actions>
                             <widgets>
                                 <screenlet id="calendarOptions" name="calendarOptionsScreenlet" collapsible="true" title="${uiLabelMap.WorkEffortCalendarFindEntries}">
@@ -213,6 +220,9 @@ under the License.
             </actions>
             <widgets>
                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="pre-body">
+                        <include-menu name="MainActionMenu" location="component://workeffort/widget/WorkEffortMenus.xml"/>
+                    </decorator-section>
                     <decorator-section name="body">
                         <platform-specific>
                             <html><html-template location="component://workeffort/template/Main.ftl"/></html>

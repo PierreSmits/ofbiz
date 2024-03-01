@@ -19,6 +19,8 @@
 package org.apache.ofbiz.webapp.control;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Set;
@@ -36,6 +38,8 @@ import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.validator.routines.UrlValidator;
 import org.apache.logging.log4j.ThreadContext;
 import org.apache.ofbiz.base.util.Debug;
+import org.apache.ofbiz.entity.GenericValue;
+import org.apache.ofbiz.security.SecurityUtil;
 
 /**
  * A Filter used to specify an allowlist of allowed paths to the OFBiz application.
@@ -147,6 +151,22 @@ public class ControlFilter extends HttpFilter {
             String uriWithContext = req.getRequestURI();
             String uri = uriWithContext.substring(context.length());
 
+            GenericValue userLogin = (GenericValue) session.getAttribute("userLogin");
+            if (!LoginWorker.hasBasePermission(userLogin, req)) { // Allows UEL and FlexibleString (OFBIZ-12602)
+                if (!GenericValue.getStackTraceAsString().contains("ControlFilterTests")
+                        && null == System.getProperty("SolrDispatchFilter") // Allows Solr tests
+                        && SecurityUtil.containsFreemarkerInterpolation(req, resp, uri)) {
+                    return;
+                }
+            }
+
+            // normalize to remove ".." special name usage to bypass webapp filter
+            try {
+                uri = new URI(uri).normalize().toString();
+            } catch (URISyntaxException e) {
+                throw new RuntimeException(e);
+            }
+
             // Check if the requested URI is allowed.
             if (allowedPaths.stream().anyMatch(uri::startsWith)) {
                 try {
@@ -165,7 +185,7 @@ public class ControlFilter extends HttpFilter {
                 }
                 if (Debug.infoOn()) {
                     Debug.logInfo("[Filtered request]: " + uriWithContext + " --> "
-                                    + (redirectPath == null ? errorCode : redirectPath), MODULE);
+                            + (redirectPath == null ? errorCode : redirectPath), MODULE);
                 }
             }
         }

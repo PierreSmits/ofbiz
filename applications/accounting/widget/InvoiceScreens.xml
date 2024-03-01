@@ -33,7 +33,7 @@ under the License.
             <widgets>
                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
                     <decorator-section name="pre-body">
-                        <include-menu location="component://accounting/widget/AccountingMenus.xml" name="MainActionMenu"/>
+                        <include-menu name="MainActionMenu" location="${parameters.mainMenuLocation}"/>
                         <section>
                             <condition>
                                 <if-service-permission service-name="acctgInvoicePermissionCheck" main-action="VIEW"/>
@@ -43,8 +43,8 @@ under the License.
                                     <condition><not><if-empty field="parameters.invoiceId"/></not></condition>
                                     <widgets>
                                         <label style="h1">${uiLabelMap.CommonInvoice}: ${invoiceId}</label>
-                                        <include-menu name="InvoiceTabBar" location="component://accounting/widget/AccountingMenus.xml"/>
-                                        <include-menu name="InvoiceSubTabBar" location="component://accounting/widget/AccountingMenus.xml"/>
+                                        <include-menu name="InvoiceTabBar" location="${parameters.mainMenuLocation}"/>
+                                        <include-menu name="InvoiceSubTabBar" location="${parameters.mainMenuLocation}"/>
                                     </widgets>
                                 </section>
                             </widgets>
@@ -87,7 +87,7 @@ under the License.
                             <widgets>
                                 <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
                                     <decorator-section name="menu-bar">
-                                        <include-menu name="InvoiceSubTabBar" location="component://accounting/widget/AccountingMenus.xml"/>
+                                        <include-menu name="InvoiceSubTabBar" location="${parameters.mainMenuLocation}"/>
                                         <container style="clear"/>
                                     </decorator-section>
                                     <decorator-section name="search-options">
@@ -197,7 +197,7 @@ under the License.
                     <field-map field-name="invoiceId" from-field="parameters.invoiceId"/>
                     <order-by field-name="invoiceItemSeqId"/>
                 </entity-and>
-                <script location="component://accounting/groovyScripts/invoice/CreateApplicationList.groovy"/>
+                <script location="component://accounting/src/main/groovy/org/apache/ofbiz/accounting/invoice/CreateApplicationList.groovy"/>
                 <set field="parameters.statusId" from-field="invoice.statusId"/>
                 <set field="invoiceAmount" value="${groovy:org.apache.ofbiz.accounting.invoice.InvoiceWorker.getInvoiceTotal(invoice)}" type="BigDecimal"/>
                 <set field="notAppliedAmount" value="${groovy:org.apache.ofbiz.accounting.invoice.InvoiceWorker.getInvoiceNotApplied(invoice)}" type="BigDecimal"/>
@@ -256,7 +256,7 @@ under the License.
                                     </condition>
                                     <widgets>
                                         <screenlet title="${uiLabelMap.AccountingInvoiceTimeEntries}" navigation-form-name="ListTimeEntries">
-                                            <include-form name="ListTimeEntries" location="component://accounting/widget/InvoiceForms.xml"/>
+                                            <include-grid name="ListTimeEntries" location="component://accounting/widget/InvoiceForms.xml"/>
                                         </screenlet>
                                     </widgets>
                                 </section>
@@ -346,8 +346,8 @@ under the License.
                 <set field="helpAnchor" value="_help_for_edit_invoice_applications"/>
                 <set field="invoiceId" from-field="parameters.invoiceId"/>
                 <entity-one entity-name="Invoice" value-field="invoice"/>
-                <script location="component://accounting/groovyScripts/invoice/CreateApplicationList.groovy"/>
-                <script location="component://accounting/groovyScripts/invoice/ListNotAppliedPayments.groovy"/>
+                <script location="component://accounting/src/main/groovy/org/apache/ofbiz/accounting/invoice/CreateApplicationList.groovy"/>
+                <script location="component://accounting/src/main/groovy/org/apache/ofbiz/accounting/invoice/ListNotAppliedPayments.groovy"/>
                 <set field="invoiceAmount" value="${groovy:org.apache.ofbiz.accounting.invoice.InvoiceWorker.getInvoiceTotal(invoice)}" type="BigDecimal"/>
                 <set field="notAppliedAmount" value="${groovy:org.apache.ofbiz.accounting.invoice.InvoiceWorker.getInvoiceNotApplied(invoice)}" type="BigDecimal"/>
                 <set field="appliedAmount" value="${groovy:org.apache.ofbiz.accounting.invoice.InvoiceWorker.getInvoiceApplied(invoice)}" type="BigDecimal"/>
@@ -370,7 +370,7 @@ under the License.
                                         <if-compare field="notAppliedAmount" operator="greater" value="0"/>
                                     </condition>
                                         <widgets>
-                                            <screenlet title="${uiLabelMap.AccountingPaymentsApplied} ${appliedAmount?currency(${invoice.currencyUomId})} 
+                                            <screenlet title="${uiLabelMap.AccountingPaymentsApplied} ${appliedAmount?currency(${invoice.currencyUomId})}
                                                 ${uiLabelMap.AccountingOpenPayments} ${notAppliedAmount?currency(${invoice.currencyUomId})}">
                                                 <include-grid name="EditInvoiceApplications" location="component://accounting/widget/InvoiceForms.xml"/>
                                             </screenlet>
@@ -390,7 +390,7 @@ under the License.
                                                     </or>
                                                 </condition>
                                                 <widgets>
-                                                    <screenlet title="${uiLabelMap.AccountingListPaymentsNotYetApplied} [${invoice.partyIdFrom}] 
+                                                    <screenlet title="${uiLabelMap.AccountingListPaymentsNotYetApplied} [${invoice.partyIdFrom}]
                                                         ${uiLabelMap.AccountingPaymentSentForm} [${invoice.partyId}]">
                                                         <section>
                                                             <condition>
@@ -416,7 +416,7 @@ under the License.
                                             </screenlet>
                                         </widgets>
                                         <fail-widgets>
-                                            <screenlet title="${uiLabelMap.AccountingPaymentsApplied} ${appliedAmount?currency(${invoice.currencyUomId})} 
+                                            <screenlet title="${uiLabelMap.AccountingPaymentsApplied} ${appliedAmount?currency(${invoice.currencyUomId})}
                                                 ${uiLabelMap.AccountingOpenPayments} ${notAppliedAmount?currency(${invoice.currencyUomId})}">
                                                 <include-grid name="EditInvoiceApplications" location="component://accounting/widget/InvoiceForms.xml"/>
                                             </screenlet>
@@ -434,8 +434,8 @@ under the License.
                                 </section>
                             </widgets>
                             <fail-widgets>
-                                <screenlet 
-                                    title="${uiLabelMap.AccountingAppliedPayments} ${appliedAmount?currency(${invoice.currencyUomId})} 
+                                <screenlet
+                                    title="${uiLabelMap.AccountingAppliedPayments} ${appliedAmount?currency(${invoice.currencyUomId})}
                                         ${uiLabelMap.AccountingOpenPayments} ${notAppliedAmount?currency(${invoice.currencyUomId})}"
                                         navigation-form-name="ListInvoiceApplications">
                                     <include-grid name="ListInvoiceApplications" location="component://accounting/widget/InvoiceForms.xml"/>
@@ -473,7 +473,7 @@ under the License.
                     <condition-expr field-name="invoiceId"  operator="equals" from-field="invoiceId"/>
                     <order-by field-name="invoiceItemSeqId"/>
                 </entity-condition>
-                <script location="component://accounting/groovyScripts/invoice/GetAccountOrganizationAndClass.groovy"/>
+                <script location="component://accounting/src/main/groovy/org/apache/ofbiz/accounting/invoice/GetAccountOrganizationAndClass.groovy"/>
             </actions>
             <widgets>
                 <decorator-screen name="CommonInvoiceDecorator" location="${parameters.invoiceDecoratorLocation}">
@@ -811,7 +811,7 @@ under the License.
         <section>
             <actions>
                 <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
-                <script location="component://party/groovyScripts/party/GetMyCompany.groovy"/>
+                <script location="component://party/src/main/groovy/org/apache/ofbiz/party/party/GetMyCompany.groovy"/>
                 <entity-condition entity-name="Invoice" list="invoices">
                     <condition-list combine="and">
                         <condition-expr field-name="partyId" operator="equals" from-field="myCompanyId"/>

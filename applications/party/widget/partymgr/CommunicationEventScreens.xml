@@ -24,7 +24,7 @@ under the License.
         <section>
             <actions>
                 <set field="headerItem" value="comm"/>
-                <script location="component://party/groovyScripts/communication/GetMyCommunicationEventRole.groovy"/>
+                <script location="component://party/src/main/groovy/org/apache/ofbiz/party/communication/GetMyCommunicationEventRole.groovy"/>
             </actions>
             <widgets>
                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
@@ -61,7 +61,7 @@ under the License.
     <screen name="CommonMyCommunicationEventDecorator">
         <section>
             <actions>
-                <script location="component://party/groovyScripts/communication/GetMyCommunicationEventRole.groovy"/>
+                <script location="component://party/src/main/groovy/org/apache/ofbiz/party/communication/GetMyCommunicationEventRole.groovy"/>
             </actions>
             <widgets>
                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
@@ -965,7 +965,7 @@ under the License.
                                 </condition>
                                 <actions>
                                     <set field="fromPartyId" from-field="communicationEvent.partyIdFrom"/>
-                                    <script location="component://projectmgr/groovyScripts/GetLastRequestAssignment.groovy"/>
+                                    <script location="component://projectmgr/src/main/groovy/org/apache/ofbiz/projectmgr/GetLastRequestAssignment.groovy"/>
                                 </actions>
                                 <widgets>
                                     <screenlet title="${uiLabelMap.OrderRequest}">

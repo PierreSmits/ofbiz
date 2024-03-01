@@ -344,14 +344,14 @@ under the License.
                         <set field="defaultOrganizationPartyId" from-field="userPreferences.ORGANIZATION_PARTY" global="true"/>
 
                         <set field="messagesTemplateLocation" from-field="layoutSettings.VT_MSG_TMPLT_LOC" default-value="component://common-theme/template/includes/Messages.ftl"/>
-                        <set field="layoutSettings.styleSheets[]" value="/common/js/jquery/plugins/featherlight/featherlight-1.7.13.min.css" global="true"/>
-                        <set field="layoutSettings.javaScripts[+0]" value="/common/js/jquery/plugins/featherlight/featherlight-1.7.13.min.js" global="true"/>
+                        <set field="layoutSettings.styleSheets[]" value="/common/js/node_modules/featherlight/release/featherlight.min.css" global="true"/>
+                        <set field="layoutSettings.javaScripts[+0]" value="/common/js/node_modules/featherlight/release/featherlight.min.js" global="true"/>
                         <set field="layoutSettings.javaScripts[+0]" value="/common/js/node_modules/jquery-ui-dist/jquery-ui.min.js" global="true"/>
                         <set field="layoutSettings.javaScripts[+0]" value="/common/js/node_modules/jquery-validation/dist/jquery.validate.min.js"/>
                         <set field="layoutSettings.javaScripts[+0]" value="/common/js/node_modules/jquery.browser/dist/jquery.browser.min.js" global="true"/>
                         <set field="layoutSettings.javaScripts[+0]" value="/common/js/node_modules/jquery-migrate/dist/jquery-migrate.min.js" global="true"/>
                         <set field="layoutSettings.javaScripts[+0]" value="/common/js/node_modules/jquery/dist/jquery.min.js" global="true"/>
-                        <set field="layoutSettings.javaScripts[+0]" value="/common/js/node_modules/node_modules/dompurify/dist/purify.min.js" global="true"/>
+                        <set field="layoutSettings.javaScripts[+0]" value="/common/js/node_modules/dompurify/dist/purify.min.js" global="true"/>
                         <set field="layoutSettings.javaScripts[]" value="/common/js/util/OfbizUtil.js" global="true"/>
                     </actions>
                     <widgets>
@@ -402,7 +402,7 @@ under the License.
                         <set field="searchType" from-field="parameters.searchType" default-value="${searchType}"/>
                         <set field="autocompleterViewSize" from-field="parameters.autocompleterViewSize"
                              default-value="${groovy: modelTheme.getAutocompleterDefaultViewSize()}"/>
-                        <script location="component://common/groovyScripts/FindAutocompleteOptions.groovy"/>
+                        <script location="component://common/src/main/groovy/org/apache/ofbiz/common/FindAutocompleteOptions.groovy"/>
                     </actions>
                     <widgets>
                         <decorator-screen name="AjaxGlobalDecorator">
@@ -457,7 +457,7 @@ under the License.
                 <set field="layoutSettings.javaScripts[+0]" value="/common/js/node_modules/jquery.browser/dist/jquery.browser.min.js" global="true"/>
                 <set field="layoutSettings.javaScripts[+0]" value="/common/js/node_modules/jquery-migrate/dist/jquery-migrate.min.js" global="true" />
                 <set field="layoutSettings.javaScripts[+0]" value="/common/js/node_modules/jquery/dist/jquery.min.js" global="true"/>
-                <set field="layoutSettings.javaScripts[+0]" value="/common/js/node_modules/node_modules/dompurify/dist/purify.min.js" global="true"/>
+                <set field="layoutSettings.javaScripts[+0]" value="/common/js/node_modules/dompurify/dist/purify.min.js" global="true"/>
                 <!-- jQuery CSSs -->
                 <set field="layoutSettings.styleSheets[+0]" value="/common/js/node_modules/jquery-ui-dist/jquery-ui.min.css" global="true"/>
 
@@ -655,6 +655,17 @@ under the License.
                         </section>
                     </decorator-section>
                 </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="GetUiLabels">
+        <section>
+            <actions>
+                <property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="requiredLabels" value="${groovy: new groovy.json.JsonSlurper().parseText(parameters.requiredLabels)}"/>
+            </actions>
+            <widgets>
+                <platform-specific><text><html-template location="component://common-theme/template/GetUiLabels.ftl"/></text></platform-specific>
             </widgets>
         </section>
     </screen>

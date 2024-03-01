@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -179,8 +181,27 @@ public final class JobManager {
             return Collections.emptyList();
         }
         // basic query
-        List<EntityExpr> expressions = UtilMisc.toList(EntityCondition.makeCondition("runTime",
-                EntityOperator.LESS_THAN_EQUAL_TO, UtilDateTime.nowTimestamp()),
+        /*
+            By adding the runTimeEpoch field to handle DST changes in recurring job scheduling is a practical solution.
+            By storing the runtime epoch in UTC format, to make the system DST-aware, which helps prevent issues related to time changes,
+                especially when the clock is set back by 1 hour during the transition.
+            Additionally, keeping the runtime field while polling is a good practice,
+                as it ensures backward compatibility and provides flexibility in situations where the system sets the jobSandbox.runtime value.
+            This approach allows the system to work with both the new UTC-based runTimeEpoch field and the existing runtime field, as needed.
+            To summarize, by introducing the runTimeEpoch field and handling the transition between UTC epoch time and the runtime field,
+                to  make recurring job scheduling more robust and DST-aware,
+                which should help prevent scheduling issues during Daylight Saving Time changes.
+         */
+        List<EntityCondition> expressions = UtilMisc.toList(
+                EntityCondition.makeCondition(
+                        EntityCondition.makeCondition("runTimeEpoch",
+                                EntityOperator.LESS_THAN_EQUAL_TO, ZonedDateTime.now(ZoneId.of("UTC")).toInstant().toEpochMilli()),
+                        EntityOperator.OR,
+                        EntityCondition.makeCondition(
+                                EntityCondition.makeCondition("runTimeEpoch", null),
+                                EntityOperator.AND,
+                                EntityCondition.makeCondition("runTime",
+                                        EntityOperator.LESS_THAN_EQUAL_TO, UtilDateTime.nowTimestamp()))),
                 EntityCondition.makeCondition("startDateTime", EntityOperator.EQUALS, null),
                 EntityCondition.makeCondition("cancelDateTime", EntityOperator.EQUALS, null),
                 EntityCondition.makeCondition("runByInstanceId", EntityOperator.EQUALS, null));
@@ -253,16 +274,6 @@ public final class JobManager {
                 Debug.logWarning(e, "Unable to get purge job days: ", MODULE);
                 return Collections.emptyList();
             }
-            List<EntityCondition> purgeCondition = UtilMisc.toList(
-                    EntityCondition.makeCondition("runByInstanceId", INSTANCE_ID),
-                    EntityCondition.makeCondition(UtilMisc.toList(
-                            EntityCondition.makeCondition(UtilMisc.toList(
-                                    EntityCondition.makeCondition("finishDateTime", EntityOperator.NOT_EQUAL, null),
-                                    EntityCondition.makeCondition("finishDateTime", EntityOperator.LESS_THAN, purgeTime))),
-                            EntityCondition.makeCondition(UtilMisc.toList(
-                                    EntityCondition.makeCondition("cancelDateTime", EntityOperator.NOT_EQUAL, null),
-                                    EntityCondition.makeCondition("cancelDateTime", EntityOperator.LESS_THAN, purgeTime)))),
-                            EntityOperator.OR));
             beganTransaction = false;
             try {
                 beganTransaction = TransactionUtil.begin();
@@ -270,12 +281,8 @@ public final class JobManager {
                     Debug.logWarning("Unable to poll JobSandbox for jobs; unable to begin transaction.", MODULE);
                     return Collections.emptyList();
                 }
-                List<GenericValue> jobs = EntityQuery.use(delegator).from("JobSandbox")
-                        .where(purgeCondition)
-                        .select("jobId")
-                        .maxRows(limit)
-                        .queryList();
-                jobs.forEach(jobValue -> poll.add(new PurgeJob(jobValue)));
+                getJobsToPurge(delegator, null, INSTANCE_ID, limit, purgeTime)
+                        .forEach(jobValue -> poll.add(new PurgeJob(jobValue)));
                 TransactionUtil.commit(beganTransaction);
             } catch (Throwable t) {
                 String errMsg = "Exception thrown while polling JobSandbox: ";
@@ -289,6 +296,30 @@ public final class JobManager {
             }
         }
         return poll;
+    }
+
+    public static List<GenericValue> getJobsToPurge(Delegator delegator, String poolId, String instanceId, int limit, Timestamp purgeTime)
+            throws GenericEntityException {
+        List<EntityCondition> purgeCondition = UtilMisc.toList(
+                EntityCondition.makeCondition(UtilMisc.toList(
+                                EntityCondition.makeCondition(UtilMisc.toList(
+                                        EntityCondition.makeCondition("finishDateTime", EntityOperator.NOT_EQUAL, null),
+                                        EntityCondition.makeCondition("finishDateTime", EntityOperator.LESS_THAN, purgeTime))),
+                                EntityCondition.makeCondition(UtilMisc.toList(
+                                        EntityCondition.makeCondition("cancelDateTime", EntityOperator.NOT_EQUAL, null),
+                                        EntityCondition.makeCondition("cancelDateTime", EntityOperator.LESS_THAN, purgeTime)))),
+                        EntityOperator.OR));
+        if (UtilValidate.isNotEmpty(instanceId)) {
+            purgeCondition.add(EntityCondition.makeCondition("runByInstanceId", instanceId));
+        }
+        if (UtilValidate.isNotEmpty(poolId)) {
+            purgeCondition.add(EntityCondition.makeCondition("poolId", poolId));
+        }
+        return EntityQuery.use(delegator).from("JobSandbox")
+                .where(purgeCondition)
+                .select("jobId", "runtimeDataId", "recurrenceInfoId")
+                .maxRows(limit)
+                .queryList();
     }
 
     public synchronized void reloadCrashedJobs() {

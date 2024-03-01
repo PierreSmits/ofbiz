@@ -217,9 +217,10 @@ under the License.
         <attribute name="contactMechId" type="String" mode="IN" optional="false"/>
         <attribute name="oldContactMechId" type="String" mode="IN" optional="false"/>
     </service>
-    <service name="deleteContactListParty" default-entity-name="ContactListParty" engine="entity-auto" invoke="delete" auth="true">
-        <description>Remove Party from ContactList</description>
-        <auto-attributes include="pk" mode="IN" optional="false"/>
+    <service name="deleteContactListParty" default-entity-name="ContactListParty" engine="java"
+    	location="org.apache.ofbiz.marketing.marketing.MarketingServices" invoke="deleteContactListParty" auth="true">
+    	<description>Remove Party from ContactList</description>
+    	<auto-attributes include="pk" mode="IN" optional="true"/>
     </service>
     <service name="createContactListPartyStatus" default-entity-name="ContactListPartyStatus" engine="simple"
         location="component://marketing/minilang/marketing/contact/ContactListServices.xml" invoke="createContactListPartyStatus" auth="true">
@@ -481,7 +482,7 @@ under the License.
     </service>
 
     <!-- lead services -->
-    <service name="createLead" engine="groovy" location="component://marketing/groovyScripts/sfa/lead/LeadServices.groovy" invoke="createLead">
+    <service name="createLead" engine="groovy" location="component://marketing/src/main/groovy/org/apache/ofbiz/marketing/sfa/lead/LeadServices.groovy" invoke="createLead">
         <description>
             Sales Lead can be just a person or a person representing a company or a company (party group).
             createLead works
@@ -551,7 +552,7 @@ under the License.
     </service>
     <!-- Account services  -->
     <service name="createAccount" engine="groovy"
-        location="component://marketing/groovyScripts/sfa/account/AccountServices.groovy" invoke="createAccount">
+        location="component://marketing/src/main/groovy/org/apache/ofbiz/marketing/sfa/account/AccountServices.groovy" invoke="createAccount">
         <description>Create an Account Group</description>
         <auto-attributes entity-name="PartyGroup" mode="IN" optional="true">
             <exclude field-name="partyId"/>
@@ -566,7 +567,7 @@ under the License.
         <attribute name="extension" type="String" mode="IN" optional="true"/>
         <attribute name="partyId" type="String" mode="OUT" optional="false"/>
     </service>
-    <service name="convertLeadToContact" engine="groovy" location="component://marketing/groovyScripts/sfa/lead/LeadServices.groovy" invoke="convertLeadToContact">
+    <service name="convertLeadToContact" engine="groovy" location="component://marketing/src/main/groovy/org/apache/ofbiz/marketing/sfa/lead/LeadServices.groovy" invoke="convertLeadToContact">
         <attribute name="partyId" type="String" mode="INOUT" optional="false"/>
         <attribute name="partyGroupId" type="String" mode="INOUT" optional="false"/>
     </service>

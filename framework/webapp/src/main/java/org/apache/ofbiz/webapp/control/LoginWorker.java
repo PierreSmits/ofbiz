@@ -21,6 +21,8 @@ package org.apache.ofbiz.webapp.control;
 import static org.apache.ofbiz.base.util.UtilGenerics.checkMap;
 
 import java.math.BigInteger;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.security.cert.X509Certificate;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -45,6 +47,7 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.PageContext;
 import javax.transaction.Transaction;
 
+import org.apache.http.HttpStatus;
 import org.apache.ofbiz.base.component.ComponentConfig;
 import org.apache.ofbiz.base.component.ComponentConfig.WebappInfo;
 import org.apache.ofbiz.base.util.Debug;
@@ -332,13 +335,13 @@ public final class LoginWorker {
             password = request.getParameter("PASSWORD");
             token = request.getParameter("TOKEN");
             // check session attributes
-            if (username == null) username = (String) session.getAttribute("USERNAME");
-            if (password == null) password = (String) session.getAttribute("PASSWORD");
-            if (token == null) token = (String) session.getAttribute("TOKEN");
+            if (UtilValidate.isEmpty(username)) username = (String) session.getAttribute("USERNAME");
+            if (UtilValidate.isEmpty(password)) password = (String) session.getAttribute("PASSWORD");
+            if (UtilValidate.isEmpty(token)) token = (String) session.getAttribute("TOKEN");
 
             // in this condition log them in if not already; if not logged in or can't log in, save parameters and return error
-            if (username == null
-                    || (password == null && token == null)
+            if (UtilValidate.isEmpty(username)
+                    || (UtilValidate.isEmpty(password) && UtilValidate.isEmpty(token))
                     || "error".equals(login(request, response))) {
 
                 // make sure this attribute is not in the request; this avoids infinite recursion when a login by less stringent criteria
@@ -362,6 +365,7 @@ public final class LoginWorker {
                 if (UtilValidate.isNotEmpty(formParams)) {
                     session.setAttribute("_PREVIOUS_PARAM_MAP_FORM_", formParams);
                 }
+                response.setStatus(HttpStatus.SC_UNAUTHORIZED);
                 return "error";
             }
         }
@@ -415,9 +419,9 @@ public final class LoginWorker {
             }
         }
 
-        if (username == null) username = (String) session.getAttribute("USERNAME");
-        if (password == null) password = (String) session.getAttribute("PASSWORD");
-        if (token == null) token = (String) session.getAttribute("TOKEN");
+        if (UtilValidate.isEmpty(username)) username = (String) session.getAttribute("USERNAME");
+        if (UtilValidate.isEmpty(password)) password = (String) session.getAttribute("PASSWORD");
+        if (UtilValidate.isEmpty(token)) token = (String) session.getAttribute("TOKEN");
 
         // allow a username and/or password in a request attribute to override the request parameter or the session attribute;
         // this way a preprocessor can play with these a bit...
@@ -608,7 +612,7 @@ public final class LoginWorker {
             String errMsg = UtilProperties.getMessage(RESOURCE, "loginevents.following_error_occurred_during_login",
                     messageMap, UtilHttp.getLocale(request));
             request.setAttribute("_ERROR_MESSAGE_", errMsg);
-            return requirePasswordChange ? "requirePasswordChange" : "error";
+            return "error";
         }
     }
 
@@ -802,7 +806,7 @@ public final class LoginWorker {
             return "error";
         }
         if (userLogin != null && hasBasePermission(userLogin, request)) {
-            doBasicLogin(userLogin, request);
+            doBasicLogin(userLogin, request, response);
         } else {
             String errMsg = UtilProperties.getMessage(RESOURCE, "loginevents.unable_to_login_this_application", UtilHttp.getLocale(request));
             request.setAttribute("_ERROR_MESSAGE_", errMsg);
@@ -815,10 +819,11 @@ public final class LoginWorker {
 
         request.setAttribute("_LOGIN_PASSED_", "TRUE");
 
-        // run the after-login events
-        RequestHandler rh = RequestHandler.getRequestHandler(request.getSession().getServletContext());
-        rh.runAfterLoginEvents(request, response);
-
+        if (!"Y".equals(UtilProperties.getPropertyValue(SEC_PROPERTIES, "security.login.loginEventsAfterBasicLogin", "N"))) {
+            // run the after-login events
+            RequestHandler rh = RequestHandler.getRequestHandler(request.getSession().getServletContext());
+            rh.runAfterLoginEvents(request, response);
+        }
         // Create a secured cookie with the correct userLoginId
         createSecuredLoginIdCookie(request, response);
 
@@ -828,7 +833,7 @@ public final class LoginWorker {
         return autoLoginCheck(request, response);
     }
 
-    public static void doBasicLogin(GenericValue userLogin, HttpServletRequest request) {
+    public static void doBasicLogin(GenericValue userLogin, HttpServletRequest request, HttpServletResponse response) {
         HttpSession session = request.getSession();
         session.setAttribute("userLogin", userLogin);
 
@@ -927,6 +932,11 @@ public final class LoginWorker {
             } catch (ServletException e) {
                 Debug.logError(e, MODULE);
             }
+        }
+        if ("Y".equals(UtilProperties.getPropertyValue(SEC_PROPERTIES, "security.login.loginEventsAfterBasicLogin", "N"))) {
+            // run the after-login events
+            RequestHandler rh = RequestHandler.getRequestHandler(request.getSession().getServletContext());
+            rh.runAfterLoginEvents(request, response);
         }
 
         // setup some things that should always be there
@@ -1235,7 +1245,7 @@ public final class LoginWorker {
                         Map<String, String> x500Map = KeyStoreUtil.getCertX500Map(clientCerts[i]);
                         if (i == 0) {
                             String cn = x500Map.get("CN");
-                            cn = cn.replaceAll("\\\\", "");
+                            cn = cn.replace("\\", "");
                             Matcher m = pattern.matcher(cn);
                             if (m.matches()) {
                                 userLoginId = m.group(1);
@@ -1364,6 +1374,13 @@ public final class LoginWorker {
             if (UtilValidate.isEmpty(contextPath)) {
                 contextPath = "/";
             }
+
+            try {
+                contextPath = new URI(contextPath).normalize().toString();
+            } catch (URISyntaxException e) {
+                throw new RuntimeException(e);
+            }
+
             ComponentConfig.WebappInfo info = ComponentConfig.getWebAppInfo(serverId, contextPath);
             if (info != null) {
                 return hasApplicationPermission(info, security, userLogin);
@@ -1373,7 +1390,7 @@ public final class LoginWorker {
                 }
             }
         } else {
-            if (Debug.warningOn()) {
+            if (Debug.warningOn() && !GenericValue.getStackTraceAsString().contains("ControlFilter")) {
                 Debug.logWarning("Received a null Security object from HttpServletRequest", MODULE);
             }
         }

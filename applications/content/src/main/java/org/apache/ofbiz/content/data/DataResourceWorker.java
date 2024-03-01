@@ -66,6 +66,7 @@ import org.apache.ofbiz.base.util.UtilHttp;
 import org.apache.ofbiz.base.util.UtilIO;
 import org.apache.ofbiz.base.util.UtilMisc;
 import org.apache.ofbiz.base.util.UtilProperties;
+import org.apache.ofbiz.base.util.UtilURL;
 import org.apache.ofbiz.base.util.UtilValidate;
 import org.apache.ofbiz.base.util.UtilXml;
 import org.apache.ofbiz.base.util.collections.MapStack;
@@ -107,6 +108,7 @@ public class DataResourceWorker implements org.apache.ofbiz.widget.content.DataR
 
     private static final String MODULE = DataResourceWorker.class.getName();
     private static final String ERR_RESOURCE = "ContentErrorUiLabels";
+    private static final String PROPERTY_RESOURCE = "content";
 
     /**
      * Traverses the DataCategory parent/child structure and put it in categoryNode. Returns non-null error string if there is an error.
@@ -377,41 +379,68 @@ public class DataResourceWorker implements org.apache.ofbiz.widget.content.DataR
         return b;
     }
 
+    /**
+     * Gets the MIME-Type from a given data resource, using the default value set in properties as fallback.
+     * @param dataResource
+     * @return MIME-Type
+     */
     public static String getMimeType(GenericValue dataResource) {
+        String defaultMimeType = EntityUtilProperties.getPropertyValue(PROPERTY_RESOURCE, "defaultMimeType", "application/octet-stream",
+                dataResource.getDelegator());
+        return getMimeType(dataResource, defaultMimeType);
+    }
+
+    /**
+     * Gets the MIME-Type from a given data resource.
+     * @param dataResource
+     * @param defaultMimeTypeId
+     * @return MIME-Type
+     */
+    public static String getMimeType(GenericValue dataResource, String defaultMimeTypeId) {
         String mimeTypeId = null;
         if (dataResource != null) {
             mimeTypeId = (String) dataResource.get("mimeTypeId");
             if (UtilValidate.isEmpty(mimeTypeId)) {
                 String fileName = (String) dataResource.get("objectInfo");
-                if (fileName != null && fileName.indexOf('.') > -1) {
-                    String fileExtension = fileName.substring(fileName.lastIndexOf('.') + 1);
-                    if (UtilValidate.isNotEmpty(fileExtension)) {
-                        GenericValue ext = null;
-                        try {
-                            ext = dataResource.getDelegator().findOne("FileExtension",
-                                    UtilMisc.toMap("fileExtensionId", fileExtension), false);
-                        } catch (GenericEntityException e) {
-                            Debug.logError(e, MODULE);
-                        }
-                        if (ext != null) {
-                            mimeTypeId = ext.getString("mimeTypeId");
-                        }
-                    }
-                }
+                mimeTypeId = getMimeType(dataResource.getDelegator(), fileName, defaultMimeTypeId);
+            }
+        }
+        return mimeTypeId;
+    }
 
-                // check one last time
-                if (UtilValidate.isEmpty(mimeTypeId)) {
-                    // use a default mime type
-                    mimeTypeId = "application/octet-stream";
+    /**
+     * Gets the MIME-Type from a given filename.
+     * @param delegator
+     * @param fileName
+     * @param defaultMimeTypeId
+     * @return MIME-Type
+     */
+    public static String getMimeType(Delegator delegator, String fileName, String defaultMimeTypeId) {
+        String mimeTypeId = null;
+
+        if (UtilValidate.isNotEmpty(fileName) && fileName.indexOf('.') > -1) {
+            String fileExtension = fileName.substring(fileName.lastIndexOf('.') + 1);
+            if (UtilValidate.isNotEmpty(fileExtension)) {
+                GenericValue ext = null;
+                try {
+                    ext = delegator.findOne("FileExtension", true, "fileExtensionId", fileExtension);
+                    if (ext != null) {
+                        mimeTypeId = ext.getString("mimeTypeId");
+                    }
+                } catch (GenericEntityException e) {
+                    Debug.logError(e, MODULE);
                 }
             }
+        }
+        // check one last time, if we have to return a default mime type
+        if (UtilValidate.isEmpty(mimeTypeId) && UtilValidate.isNotEmpty(defaultMimeTypeId)) {
+            mimeTypeId = defaultMimeTypeId;
         }
         return mimeTypeId;
     }
 
     public static String getMimeTypeWithByteBuffer(java.nio.ByteBuffer buffer) throws IOException {
         byte[] b = buffer.array();
-
         Tika tika = new Tika();
         return tika.detect(b);
     }
@@ -917,7 +946,7 @@ public class DataResourceWorker implements org.apache.ofbiz.widget.content.DataR
                     sep = "/";
                 }
                 String fixedUrlStr = prefix + sep + url.toString();
-                URL fixedUrl = new URL(fixedUrlStr);
+                URL fixedUrl = UtilURL.fromUrlString(fixedUrlStr);
                 text = (String) fixedUrl.getContent();
             }
             out.append(text);
@@ -1141,14 +1170,14 @@ public class DataResourceWorker implements org.apache.ofbiz.widget.content.DataR
         } else if ("URL_RESOURCE".equals(dataResourceTypeId)) {
             String objectInfo = dataResource.getString("objectInfo");
             if (UtilValidate.isNotEmpty(objectInfo)) {
-                URL url = new URL(objectInfo);
+                URL url = UtilURL.fromUrlString(objectInfo);
                 if (url.getHost() == null) { // is relative
                     String newUrl = DataResourceWorker.buildRequestPrefix(delegator, locale, webSiteId, https);
                     if (!newUrl.endsWith("/")) {
                         newUrl = newUrl + "/";
                     }
                     newUrl = newUrl + url.toString();
-                    url = new URL(newUrl);
+                    url = UtilURL.fromUrlString(newUrl);
                 }
 
                 URLConnection con = url.openConnection();
