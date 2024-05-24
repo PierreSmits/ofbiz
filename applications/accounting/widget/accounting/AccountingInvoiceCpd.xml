@@ -60,9 +60,6 @@ under the License.
                     <ws:decorator-screen name="CommonEmbeddedDecorator" location="component://accounting/widget/CommonScreens.xml">
                         <ws:decorator-section name="single">
                             <ws:decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
-                               <ws:decorator-section name="menu-bar">
-                                    <ws:include-menu name="FindInvoicesMenuBar" location="component://accounting/widget/accounting/AccountingInvoiceCpd.xml"/>
-                                </ws:decorator-section>
                                 <ws:decorator-section name="search-options">
                                     <ws:platform-specific>
                                         <ws:html><ws:html-template multi-block="true" location="component://common-theme/template/includes/SetMultipleSelectJsList.ftl"/></ws:html>
@@ -243,21 +240,6 @@ under the License.
         </ws:screen>
 
     </ws:screens>
-
-    <wm:menus>
-
-        <wm:menu name="FindInvoicesMenuBar" extends="CommonButtonBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
-            <wm:menu-item name="AccountingInvoiceCreate" title="${uiLabelMap.AccountingCreateNewInvoice}">
-                <wm:condition>
-                    <wm:if-has-permission permission="ACCOUNTING" action="_CREATE"/>
-                </wm:condition>
-                <wm:link target="Accounting/Invoice/New" link-type="layered-modal">
-                    <wm:set-callback area-target="Accounting/Invoice/Find"/>
-                </wm:link>
-            </wm:menu-item>
-        </wm:menu>
-
-    </wm:menus>
 
     <wf:forms>
 
