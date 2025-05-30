@@ -19,19 +19,14 @@ github:
   dependabot_alerts:  true
   dependabot_updates: false
   labels:
-    - ofbiz
-    - plugins
-    - xml
-    - java
-    - groovy
-    - javascript
-    - web-framework
-    - database
-    - network-server
-    - https
-    - content
-    - geospatial
-    - hacktoberfest
+    - Order Management
+    - Accounting
+    - Product Information Management
+    - B2B e-Commerce
+    - B2C e-Commerce
+    - Content Management
+    - Marketing Management
+    - Warehouse Management
   enabled_merge_buttons:
     # enable squash button:
     squash:  true
