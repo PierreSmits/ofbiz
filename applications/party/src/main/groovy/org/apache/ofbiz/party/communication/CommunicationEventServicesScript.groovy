@@ -513,17 +513,18 @@ Map setCommunicationEventStatus() {
     GenericValue communicationEvent = from('CommunicationEvent')
             .where(parameters)
             .queryOne()
-    oldStatusId = communicationEvent.statusId
-
-    if (parameters.statusId != communicationEvent.statusId) {
-        GenericValue statusChange = from('StatusValidChange')
-                .where(statusId: communicationEvent.statusId,
-                        statusIdTo: parameters.statusId)
-                .queryOne()
-        if (!statusChange) {
-            logError("Cannot change from ${communicationEventRole.statusId} to ${parameters.statusId}")
-            return error(UtilProperties.getMessage('ProductUiLabels',
-                            'commeventservices.communication_event_status', parameters.locale as Locale))
+    String oldStatusId = communicationEvent.statusId
+    if (parameters.statusId != oldStatusId) {
+        if (oldStatusId) {
+            GenericValue statusChange = from('StatusValidChange')
+                    .where(statusId: oldStatusId,
+                            statusIdTo: parameters.statusId)
+                    .queryOne()
+            if (!statusChange) {
+                logError("Cannot change from ${oldStatusId} to ${parameters.statusId}")
+                return error(label('PartyErrorUiLabels', 'commeventservices.communication_event_status',
+                        [parameters: parameters, communicationEvent: communicationEvent]))
+            }
         }
         communicationEvent.statusId = parameters.statusId
         communicationEvent.store()
@@ -596,17 +597,19 @@ Map setCommunicationEventRoleStatus() {
             .where(parameters)
             .queryOne()
 
-    oldStatusId = communicationEventRole.statusId
-    if (parameters.statusId != communicationEventRole.statusId) {
-        GenericValue statusChange = from('StatusValidChange')
-                .where(statusId: communicationEventRole.statusId,
-                        statusIdTo: parameters.statusId)
-                .cache()
-                .queryOne()
-        if (!statusChange) {
-            logError("Cannot change from ${communicationEventRole.statusId} to ${parameters.statusId}")
-            return error(UtilProperties.getMessage('ProductUiLabels',
-                            'commeventservices.communication_event_status', parameters.locale as Locale))
+    String oldStatusId = communicationEventRole.statusId
+    if (parameters.statusId != oldStatusId) {
+        if (oldStatusId) {
+            GenericValue statusChange = from('StatusValidChange')
+                    .where(statusId: oldStatusId,
+                            statusIdTo: parameters.statusId)
+                    .cache()
+                    .queryOne()
+            if (!statusChange) {
+                logError("Cannot change from ${oldStatusId} to ${parameters.statusId}")
+                return error(label('PartyErrorUiLabels', 'commeventservices.communication_event_role_status',
+                        [parameters: parameters, communicationEventRole: communicationEventRole]))
+            }
         }
         communicationEventRole.statusId = parameters.statusId
         communicationEventRole.store()

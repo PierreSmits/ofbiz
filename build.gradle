@@ -210,13 +210,12 @@ allprojects {
             url "https://repository.ow2.org/nexus/content/repositories/public/"
         }
         maven {
-            // To test not released FreeMarker versions
-            url "https://repository.apache.org/content/repositories/snapshots/"
-            }
-        maven {
             url "https://artifacts.alfresco.com/nexus/content/repositories/public/"
         }
-
+        /* maven {
+            // To test not released FreeMarker versions, see OFBIZ-12934 and sub-tasks for details
+            url "https://repository.apache.org/content/repositories/snapshots/"
+        } */
     }
 }
 
